@@ -9,7 +9,7 @@
   const $ = id => document.getElementById(id);
   const TZ = CFG.TIMEZONE;
 
-  const state = { data: null, lastOkAt: 0, lastError: null, timer: null, prevSig: {}, busy: false };
+  const state = { data: null, lastOkAt: 0, lastError: null, timer: null, prevSig: {}, busy: false };ب
 
   // ------------------------------------------------------------ stage scaling
   function scale() {
@@ -52,7 +52,7 @@
     const tg = (s.tagline || "").split(/,\s*/);
     $("tagline").innerHTML = tg.map(P.esc).join(",\n") + (s.tagline ? ' <span class="heart">♡</span>' : "");
     const logo = $("logo");
-    const want = s.logo || "assets/logo-placeholder.png";
+    const want = "assets/mch-cluster-logo.png";
     if (logo.getAttribute("src") !== want) logo.setAttribute("src", want);
     document.title = (s.departmentCode || "PSW") + " Ward Board";
     $("h-summary").innerHTML = P.icon("bars", "", 2.6) + P.esc(P.t("wardSummary"));
