@@ -30,12 +30,15 @@
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
 
-  <!-- Logo adjustment -->
+  <!-- New Hospital / Health Cluster Logo -->
   <style>
+
+    /* Logo container */
     .brand {
       display: flex;
       align-items: center;
       justify-content: flex-start;
+      min-width: 0;
     }
 
     .logo-slot {
@@ -43,31 +46,43 @@
       align-items: center;
       justify-content: flex-start;
 
-      /* Wider space for the new horizontal logo */
       width: 390px;
-      height: 90px;
+      height: 92px;
 
-      overflow: visible;
       flex-shrink: 0;
+      overflow: visible;
     }
 
+    /* New logo */
     .logo-slot img,
     #logo {
       display: block;
+
       width: 100%;
       height: 100%;
+
       max-width: 100%;
       max-height: 100%;
+
       object-fit: contain;
       object-position: left center;
     }
 
-    /* The new logo already contains the hospital/cluster text */
+    /*
+      The new logo already contains:
+      - تجمع حفر الباطن الصحي
+      - Hafr Al Batin Health Cluster
+      - Maternity and Children Hospital
+
+      Therefore the old text is hidden.
+    */
     .brand-text {
       display: none !important;
     }
+
   </style>
 </head>
+
 
 <body class="tv">
 
@@ -75,24 +90,38 @@
 
     <div id="stage" aria-live="off">
 
-      <!-- =========================
+
+      <!-- =====================================
            HEADER
-      ========================== -->
+      ====================================== -->
+
       <header class="hdr">
 
-        <!-- Hospital / Cluster Logo -->
+
+        <!-- Hospital / Health Cluster Logo -->
+
         <div class="brand">
 
           <div class="logo-slot">
+
             <img
               id="logo"
-              src="assets/logo-placeholder.png.png"
+              src="assets/mch-cluster-logo.png"
               alt="Hafr Al Batin Health Cluster - Maternity and Children Hospital"
             >
+
           </div>
 
-          <!-- Kept for JS compatibility but hidden by CSS -->
+
+          <!--
+            Kept in the HTML for compatibility
+            with the existing JavaScript.
+            Hidden by CSS because the logo
+            already contains this information.
+          -->
+
           <div class="brand-text">
+
             <div
               class="ar brand-ar"
               id="hospitalNameAr">
@@ -107,12 +136,17 @@
               class="brand-cluster"
               id="cluster">
             </div>
+
           </div>
 
         </div>
 
 
-        <!-- Department Title -->
+
+        <!-- =====================================
+             DEPARTMENT NAME
+        ====================================== -->
+
         <div class="title">
 
           <h1 id="deptName"></h1>
@@ -125,14 +159,22 @@
         </div>
 
 
-        <!-- Tagline -->
+
+        <!-- =====================================
+             TAGLINE
+        ====================================== -->
+
         <div
           class="tagline"
           id="tagline">
         </div>
 
 
-        <!-- Date / Time -->
+
+        <!-- =====================================
+             DATE & TIME
+        ====================================== -->
+
         <div class="clock">
 
           <div
@@ -152,30 +194,38 @@
       </header>
 
 
-      <!-- =========================
+
+      <!-- =====================================
            KPI CARDS
-      ========================== -->
+      ====================================== -->
+
       <section
         class="kpis"
         id="kpis">
       </section>
 
 
-      <!-- =========================
-           WARD / BEDS
-      ========================== -->
+
+      <!-- =====================================
+           WARD / PATIENT BEDS
+      ====================================== -->
+
       <main
         class="ward"
         id="ward">
       </main>
 
 
-      <!-- =========================
-           RIGHT SIDE PANEL
-      ========================== -->
+
+      <!-- =====================================
+           RIGHT SIDE
+      ====================================== -->
+
       <aside class="side">
 
+
         <!-- Ward Summary -->
+
         <section class="panel summary">
 
           <h2 id="h-summary"></h2>
@@ -185,7 +235,9 @@
         </section>
 
 
+
         <!-- On Call Team -->
+
         <section class="panel oncall">
 
           <h2 id="h-oncall"></h2>
@@ -195,18 +247,23 @@
         </section>
 
 
+
         <!-- Emergency Teams -->
+
         <section
           class="emergency"
           id="emergency">
         </section>
 
+
       </aside>
 
 
-      <!-- =========================
+
+      <!-- =====================================
            FOOTER
-      ========================== -->
+      ====================================== -->
+
       <footer class="ftr">
 
         <div
@@ -222,7 +279,11 @@
       </footer>
 
 
-      <!-- Connection Status -->
+
+      <!-- =====================================
+           CONNECTION STATUS
+      ====================================== -->
+
       <div
         class="conn-banner"
         id="connBanner"
@@ -230,12 +291,17 @@
         hidden>
       </div>
 
+
     </div>
 
   </div>
 
 
-  <!-- Full Screen Hint -->
+
+  <!-- =====================================
+       FULL SCREEN MESSAGE
+  ====================================== -->
+
   <div
     class="fs-hint"
     id="fsHint">
@@ -243,16 +309,23 @@
   </div>
 
 
-  <!-- =========================
+
+  <!-- =====================================
        JAVASCRIPT
-  ========================== -->
+  ====================================== -->
 
   <script src="js/config.js"></script>
+
   <script src="js/app.js"></script>
+
   <script src="js/engine.js"></script>
+
   <script src="js/seed.js"></script>
+
   <script src="js/api.js"></script>
+
   <script src="js/dashboard.js"></script>
+
 
 </body>
 </html>
