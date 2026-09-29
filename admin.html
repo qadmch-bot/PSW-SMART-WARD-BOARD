@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>PSW Ward Board — Admin</title>
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Cairo:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body class="admin">
+  <header class="topbar">
+    <div class="tb-brand">
+      <span class="tb-mark" id="tbMark"></span>
+      <div><div class="tb-title">PSW Ward Board</div><div class="tb-sub">Admin</div></div>
+    </div>
+    <span class="mode-pill" id="modePill"></span>
+    <div class="tb-sync" id="tbSync"></div>
+    <div class="tb-right">
+      <a class="tb-link" href="index.html" target="_blank" rel="noopener" id="tvLink"></a>
+      <div class="tb-user" id="tbUser" hidden></div>
+      <button class="btn ghost-light" id="signOut" hidden></button>
+    </div>
+  </header>
+
+  <!-- Sign-in gate (live mode) -->
+  <section class="gate" id="gate" hidden>
+    <div class="gate-card">
+      <span class="gate-icon" id="gateIcon"></span>
+      <h1>Sign in to update the ward board</h1>
+      <p>Use the Google account your ward administrator added to the PSW staff list. Your sign-in is checked by the server on every change.</p>
+      <div id="gisButton" class="gis"></div>
+      <p class="gate-msg" id="gateMsg" role="alert"></p>
+      <details class="gate-conn">
+        <summary>Connection settings for this device</summary>
+        <div id="gateConn"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- App -->
+  <div class="app" id="app" hidden>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+
+    <section class="view" id="view-beds" role="tabpanel">
+      <div class="kstrip" id="kstrip"></div>
+      <div class="map" id="map"></div>
+      <p class="hint">Select a bed to admit a patient, update the status, or release the bed.</p>
+    </section>
+
+    <section class="view" id="view-oncall" role="tabpanel" hidden>
+      <div class="card">
+        <h2>On-call team</h2>
+        <p class="lead">Shown on the TV board. Consultant and specialist come from the approved PSW doctor list.</p>
+        <div id="oncallForm" class="oc-grid"></div>
+        <div class="actions"><button class="btn primary" id="saveOnCall">Save on-call team</button></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-settings" role="tabpanel" hidden>
+      <div class="settings-grid">
+        <div class="card" id="cardBoard">
+          <h2>Board and emergency numbers</h2>
+          <div id="settingsForm" class="form-grid"></div>
+          <div class="actions"><button class="btn primary" id="saveSettings">Save settings</button></div>
+        </div>
+        <div class="col">
+          <div class="card" id="cardDoctors">
+            <h2>Approved PSW doctors</h2>
+            <p class="lead">Doctors assigned to a patient or on call cannot be removed until they are reassigned.</p>
+            <div id="doctorList"></div>
+            <div class="actions split"><button class="btn" id="addDoctor">Add doctor</button><button class="btn primary" id="saveDoctors">Save doctor list</button></div>
+          </div>
+          <div class="card" id="cardTv">
+            <h2>TV display</h2>
+            <div id="tvPanel"></div>
+          </div>
+          <div class="card">
+            <h2>Connection on this device</h2>
+            <div id="connPanel"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-audit" role="tabpanel" hidden>
+      <div class="card">
+        <div class="card-h"><h2>Audit log</h2><button class="btn" id="reloadAudit">Reload</button></div>
+        <p class="lead">Every change made through this page. The full log is in the AUDIT LOG sheet.</p>
+        <div class="table-wrap"><table class="audit"><thead><tr><th>Time</th><th>User</th><th>Action</th><th>Bed</th><th>Change</th></tr></thead><tbody id="auditBody"></tbody></table></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Quick bed update -->
+  <dialog class="modal" id="bedDialog" aria-labelledby="bedTitle">
+    <form method="dialog" id="bedForm" novalidate>
+      <div class="modal-h">
+        <div><h2 id="bedTitle"></h2><div class="modal-sub" id="bedSub"></div></div>
+        <span class="state-pill" id="bedState"></span>
+      </div>
+      <div class="modal-b">
+        <div class="form-grid two">
+          <label>Room<input id="f-room" readonly tabindex="-1"></label>
+          <label>Bed<input id="f-bed" readonly tabindex="-1"></label>
+          <label>Patient code<input id="f-patientCode" autocomplete="off" spellcheck="false" maxlength="12" placeholder="P00123"><small>Code or masked MRN only. Never a name.</small><em class="err" data-for="patientCode"></em></label>
+          <div class="pair">
+            <label>Age<input id="f-age" autocomplete="off" maxlength="4" placeholder="5Y"><small>12D, 3W, 7M, 5Y</small><em class="err" data-for="age"></em></label>
+            <fieldset class="seg"><legend>Gender</legend>
+              <label><input type="radio" name="gender" value="M"><span>M</span></label>
+              <label><input type="radio" name="gender" value="F"><span>F</span></label>
+              <em class="err" data-for="gender"></em>
+            </fieldset>
+          </div>
+          <label>Doctor<select id="f-doctor"></select><em class="err" data-for="doctor"></em></label>
+          <label>Patient status<select id="f-patientStatus"></select><em class="err" data-for="patientStatus"></em></label>
+          <label>Isolation precaution<select id="f-isolationPrecaution"></select><em class="err" data-for="isolationPrecaution"></em></label>
+          <label>Expected discharge<input type="date" id="f-expectedDischarge"><em class="err" data-for="expectedDischarge"></em></label>
+          <label class="wide">Clinical note <span class="count" id="noteCount"></span><input id="f-note" maxlength="60" autocomplete="off" placeholder="Brief operational note, e.g. POD 1"><small>Shown on the TV only when privacy mode is off and notes are enabled.</small><em class="err" data-for="note"></em></label>
+        </div>
+        <p class="form-msg" id="bedMsg" role="alert"></p>
+      </div>
+      <div class="modal-f">
+        <button type="button" class="btn primary" id="bSave">Save</button>
+        <button type="button" class="btn st-discharge" id="bDischarge">For discharge</button>
+        <button type="button" class="btn st-transfer" id="bTransfer">Transfer</button>
+        <button type="button" class="btn danger" id="bAvailable">Mark available</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn link" id="bService"></button>
+        <button type="button" class="btn" id="bCancel">Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Confirm release -->
+  <dialog class="modal small" id="releaseDialog" aria-labelledby="relTitle">
+    <form method="dialog" id="relForm">
+      <div class="modal-h"><h2 id="relTitle"></h2></div>
+      <div class="modal-b">
+        <p>Releasing the bed clears the patient from the board. Do this only after the patient has left.</p>
+        <fieldset class="radios"><legend>Reason</legend>
+          <label><input type="radio" name="reason" value="Discharge completed" checked> Discharge completed</label>
+          <label><input type="radio" name="reason" value="Transfer completed"> Transfer completed</label>
+          <label><input type="radio" name="reason" value="Other"> Other</label>
+        </fieldset>
+        <label class="check"><input type="checkbox" id="relConfirm"> The patient has physically left this bed.</label>
+        <label class="check"><input type="checkbox" id="relClean"> Keep the bed out of service for cleaning.</label>
+        <p class="form-msg" id="relMsg" role="alert"></p>
+      </div>
+      <div class="modal-f">
+        <button type="button" class="btn danger" id="relOk" disabled>Mark available</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" id="relCancel">Keep patient in bed</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/seed.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
