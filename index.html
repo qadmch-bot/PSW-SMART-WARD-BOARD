@@ -2,66 +2,250 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
+
   <title>PSW Ward Board</title>
-  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+
+  <link
+    rel="icon"
+    href="assets/icons/favicon.svg"
+    type="image/svg+xml"
+  >
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Cairo:wght@500;700;800&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Cairo:wght@500;700;800&family=Dancing+Script:wght@600;700&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
+
+  <!-- Logo adjustment -->
+  <style>
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .logo-slot {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+
+      /* Wider space for the new horizontal logo */
+      width: 390px;
+      height: 90px;
+
+      overflow: visible;
+      flex-shrink: 0;
+    }
+
+    .logo-slot img,
+    #logo {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      object-position: left center;
+    }
+
+    /* The new logo already contains the hospital/cluster text */
+    .brand-text {
+      display: none !important;
+    }
+  </style>
 </head>
+
 <body class="tv">
+
   <div id="viewport">
+
     <div id="stage" aria-live="off">
 
+      <!-- =========================
+           HEADER
+      ========================== -->
       <header class="hdr">
+
+        <!-- Hospital / Cluster Logo -->
         <div class="brand">
-          <div class="logo-slot"><img id="logo" src="assets/logo-placeholder.png" alt="Hospital logo"></div>
-          <div class="brand-text">
-            <div class="ar brand-ar" id="hospitalNameAr"></div>
-            <div class="brand-en" id="hospitalName"></div>
-            <div class="brand-cluster" id="cluster"></div>
+
+          <div class="logo-slot">
+            <img
+              id="logo"
+              src="assets/logo-placeholder.png.png"
+              alt="Hafr Al Batin Health Cluster - Maternity and Children Hospital"
+            >
           </div>
+
+          <!-- Kept for JS compatibility but hidden by CSS -->
+          <div class="brand-text">
+            <div
+              class="ar brand-ar"
+              id="hospitalNameAr">
+            </div>
+
+            <div
+              class="brand-en"
+              id="hospitalName">
+            </div>
+
+            <div
+              class="brand-cluster"
+              id="cluster">
+            </div>
+          </div>
+
         </div>
+
+
+        <!-- Department Title -->
         <div class="title">
+
           <h1 id="deptName"></h1>
-          <div class="ar title-ar" id="deptNameAr"></div>
+
+          <div
+            class="ar title-ar"
+            id="deptNameAr">
+          </div>
+
         </div>
-        <div class="tagline" id="tagline"></div>
+
+
+        <!-- Tagline -->
+        <div
+          class="tagline"
+          id="tagline">
+        </div>
+
+
+        <!-- Date / Time -->
         <div class="clock">
-          <div class="clock-date" id="clockDate">&nbsp;</div>
-          <div class="clock-time" id="clockTime">&nbsp;</div>
+
+          <div
+            class="clock-date"
+            id="clockDate">
+            &nbsp;
+          </div>
+
+          <div
+            class="clock-time"
+            id="clockTime">
+            &nbsp;
+          </div>
+
         </div>
+
       </header>
 
-      <section class="kpis" id="kpis"></section>
 
-      <main class="ward" id="ward"></main>
+      <!-- =========================
+           KPI CARDS
+      ========================== -->
+      <section
+        class="kpis"
+        id="kpis">
+      </section>
 
+
+      <!-- =========================
+           WARD / BEDS
+      ========================== -->
+      <main
+        class="ward"
+        id="ward">
+      </main>
+
+
+      <!-- =========================
+           RIGHT SIDE PANEL
+      ========================== -->
       <aside class="side">
+
+        <!-- Ward Summary -->
         <section class="panel summary">
+
           <h2 id="h-summary"></h2>
+
           <div id="summary"></div>
+
         </section>
+
+
+        <!-- On Call Team -->
         <section class="panel oncall">
+
           <h2 id="h-oncall"></h2>
+
           <div id="oncall"></div>
+
         </section>
-        <section class="emergency" id="emergency"></section>
+
+
+        <!-- Emergency Teams -->
+        <section
+          class="emergency"
+          id="emergency">
+        </section>
+
       </aside>
 
+
+      <!-- =========================
+           FOOTER
+      ========================== -->
       <footer class="ftr">
-        <div class="legend" id="legend"></div>
-        <div class="sync" id="sync"></div>
+
+        <div
+          class="legend"
+          id="legend">
+        </div>
+
+        <div
+          class="sync"
+          id="sync">
+        </div>
+
       </footer>
 
-      <div class="conn-banner" id="connBanner" role="status" hidden></div>
+
+      <!-- Connection Status -->
+      <div
+        class="conn-banner"
+        id="connBanner"
+        role="status"
+        hidden>
+      </div>
+
     </div>
+
   </div>
-  <div class="fs-hint" id="fsHint">Press F or double-click for full screen</div>
+
+
+  <!-- Full Screen Hint -->
+  <div
+    class="fs-hint"
+    id="fsHint">
+    Press F or double-click for full screen
+  </div>
+
+
+  <!-- =========================
+       JAVASCRIPT
+  ========================== -->
 
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
@@ -69,5 +253,6 @@
   <script src="js/seed.js"></script>
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
+
 </body>
 </html>
