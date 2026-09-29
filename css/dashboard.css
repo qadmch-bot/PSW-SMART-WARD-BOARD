@@ -5,7 +5,10 @@ body.tv.hide-cursor { cursor: none; }
   background: linear-gradient(160deg, var(--bg-1), var(--bg-2)); }
 #stage {
   width: 1920px; height: 1080px; flex: none; position: relative;
-  transform-origin: center center; transform: scale(var(--scale, 1));
+  /* Safe initial scale prevents iOS Safari from showing only the empty centre of
+     the 1920x1080 canvas before JavaScript has measured the visual viewport. */
+  --scale: 1;
+  transform-origin: center center; transform: scale(var(--scale));
   display: grid; grid-template-columns: 1fr 372px; grid-template-rows: 112px 122px 1fr 56px;
   gap: 14px 16px; padding: 0 22px 14px;
   background:
@@ -163,3 +166,11 @@ body.tv.hide-cursor { cursor: none; }
 .fs-hint { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); background: rgba(21,48,106,.9); color: #fff;
   padding: 8px 18px; border-radius: 999px; font: 500 14px var(--font); opacity: 0; transition: opacity .4s; pointer-events: none; }
 .fs-hint.show { opacity: 1; }
+
+
+/* iPhone/iPad first-paint fallbacks. JavaScript replaces these values as soon as
+   visualViewport is available; these rules keep the board visible if that first
+   measurement is delayed by Safari's dynamic browser chrome. */
+@media (max-width: 600px) and (orientation: portrait) { #stage { --scale: .20; } }
+@media (min-width: 601px) and (max-width: 1100px) and (orientation: portrait) { #stage { --scale: .38; } }
+@media (max-height: 600px) and (orientation: landscape) { #stage { --scale: .42; } }

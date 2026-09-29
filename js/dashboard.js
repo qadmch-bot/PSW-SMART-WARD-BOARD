@@ -13,11 +13,22 @@
 
   // ------------------------------------------------------------ stage scaling
   function scale() {
-    const s = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
-    document.getElementById("stage").style.setProperty("--scale", s);
+    // iOS Safari can report an unstable layout viewport during the first paint.
+    // Prefer visualViewport when available, then fall back to the document viewport.
+    const vv = window.visualViewport;
+    const w = Math.max(1, vv && vv.width ? vv.width : (document.documentElement.clientWidth || window.innerWidth || 1920));
+    const h = Math.max(1, vv && vv.height ? vv.height : (document.documentElement.clientHeight || window.innerHeight || 1080));
+    const s = Math.min(w / 1920, h / 1080);
+    const stage = document.getElementById("stage");
+    if (stage && isFinite(s) && s > 0) stage.style.setProperty("--scale", String(s));
   }
-  window.addEventListener("resize", scale);
+  window.addEventListener("resize", scale, { passive: true });
+  window.addEventListener("orientationchange", () => setTimeout(scale, 120), { passive: true });
+  window.addEventListener("pageshow", scale, { passive: true });
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", scale, { passive: true });
   scale();
+  requestAnimationFrame(scale);
+  setTimeout(scale, 250);
 
   // ------------------------------------------------------------ clock (independent)
   function tick() {
