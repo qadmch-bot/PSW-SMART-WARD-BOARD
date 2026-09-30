@@ -1,18 +1,12 @@
 /*
  * PSW Smart Ward Board — TV dashboard (read-only).
- * The clock runs independently of data refresh.
- * Data refreshes in place (no page reload).
- * Last good data is kept IN MEMORY only,
- * and is visibly marked when the connection fails.
+ * The clock runs independently of data refresh. Data refreshes in place (no page reload).
+ * Last good data is kept IN MEMORY only, and is visibly marked when the connection fails.
  */
-
 (function () {
   "use strict";
 
-  const CFG = window.PSW_CONFIG;
-  const P = window.PSW;
-  const API = window.PSWApi;
-
+  const CFG = window.PSW_CONFIG, P = window.PSW, API = window.PSWApi;
   const $ = id => document.getElementById(id);
   const TZ = CFG.TIMEZONE;
 
@@ -25,10 +19,7 @@
     busy: false
   };
 
-  // ------------------------------------------------------------
-  // Stage scaling
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ stage scaling
   function scale() {
     const vv = window.visualViewport;
 
@@ -36,22 +27,17 @@
       1,
       vv && vv.width
         ? vv.width
-        : (document.documentElement.clientWidth ||
-           window.innerWidth ||
-           1920)
+        : (document.documentElement.clientWidth || window.innerWidth || 1920)
     );
 
     const h = Math.max(
       1,
       vv && vv.height
         ? vv.height
-        : (document.documentElement.clientHeight ||
-           window.innerHeight ||
-           1080)
+        : (document.documentElement.clientHeight || window.innerHeight || 1080)
     );
 
     const s = Math.min(w / 1920, h / 1080);
-
     const stage = document.getElementById("stage");
 
     if (stage && isFinite(s) && s > 0) {
@@ -81,18 +67,13 @@
   requestAnimationFrame(scale);
   setTimeout(scale, 250);
 
-  // ------------------------------------------------------------
-  // Clock
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ clock
   function tick() {
     const now = new Date();
 
-    $("clockDate").textContent =
-      P.fmtDate(now, TZ);
+    $("clockDate").textContent = P.fmtDate(now, TZ);
 
-    const t =
-      P.fmtTime(now, TZ, false).split(" ");
+    const t = P.fmtTime(now, TZ, false).split(" ");
 
     $("clockTime").innerHTML =
       P.esc(t[0]) +
@@ -106,53 +87,34 @@
   setInterval(tick, 1000);
   tick();
 
-  // ------------------------------------------------------------
-  // Header
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ header
   function renderHeader(s) {
     P.setLang(s.language);
 
-    $("hospitalName").textContent =
-      s.hospitalName || "";
+    $("hospitalName").textContent = s.hospitalName || "";
+    $("hospitalNameAr").textContent = s.hospitalNameAr || "";
+    $("cluster").textContent = s.cluster || "";
 
-    $("hospitalNameAr").textContent =
-      s.hospitalNameAr || "";
+    $("deptName").textContent = s.departmentName || "";
+    $("deptNameAr").textContent = s.departmentNameAr || "";
 
-    $("cluster").textContent =
-      s.cluster || "";
-
-    $("deptName").textContent =
-      s.departmentName || "";
-
-    $("deptNameAr").textContent =
-      s.departmentNameAr || "";
-
-    const tg =
-      (s.tagline || "").split(/,\s*/);
+    const tg = (s.tagline || "").split(/,\s*/);
 
     $("tagline").innerHTML =
       tg.map(P.esc).join(",\n") +
-      (
-        s.tagline
-          ? ' <span class="heart">♡</span>'
-          : ""
-      );
+      (s.tagline ? ' <span class="heart">♡</span>' : "");
 
-    // Hospital / Cluster Logo
     const logo = $("logo");
-    const want = "assets/mch-cluster-logo.png";
 
-    if (
-      logo &&
-      logo.getAttribute("src") !== want
-    ) {
+    // NEW HOSPITAL LOGO
+    const want = s.logo || "assets/mch-cluster-logo.png";
+
+    if (logo.getAttribute("src") !== want) {
       logo.setAttribute("src", want);
     }
 
     document.title =
-      (s.departmentCode || "PSW") +
-      " Ward Board";
+      (s.departmentCode || "PSW") + " Ward Board";
 
     $("h-summary").innerHTML =
       P.icon("bars", "", 2.6) +
@@ -163,42 +125,27 @@
       P.esc(P.t("onCallTeam"));
   }
 
-  // ------------------------------------------------------------
-  // KPIs
-  // ------------------------------------------------------------
-
-  function kpiCard(
-    cls,
-    label,
-    iconName,
-    value,
-    sub
-  ) {
+  // ------------------------------------------------------------ KPIs
+  function kpiCard(cls, label, iconName, value, sub) {
     return (
-      '<div class="kpi ' +
-      cls +
-      '">' +
+      '<div class="kpi ' + cls + '">' +
+        '<div class="kpi-label">' +
+          P.esc(label) +
+        "</div>" +
 
-      '<div class="kpi-label">' +
-      P.esc(label) +
-      "</div>" +
+        '<div class="kpi-main">' +
+          '<span class="kpi-icon">' +
+            P.icon(iconName) +
+          "</span>" +
 
-      '<div class="kpi-main">' +
+          '<span class="kpi-value">' +
+            value +
+          "</span>" +
+        "</div>" +
 
-      '<span class="kpi-icon">' +
-      P.icon(iconName) +
-      "</span>" +
-
-      '<span class="kpi-value">' +
-      value +
-      "</span>" +
-
-      "</div>" +
-
-      '<div class="kpi-sub">' +
-      P.esc(sub || "") +
-      "</div>" +
-
+        '<div class="kpi-sub">' +
+          P.esc(sub || "") +
+        "</div>" +
       "</div>"
     );
   }
@@ -207,18 +154,14 @@
     const C = 2 * Math.PI * 22;
 
     const off =
-      C *
-      (
-        1 -
-        Math.min(k.rate, 100) / 100
-      );
+      C * (1 - Math.min(k.rate, 100) / 100);
 
     const ringCls =
       k.rate >= 100
         ? "full"
         : k.rate >= 90
-          ? "high"
-          : "";
+        ? "high"
+        : "";
 
     const ring =
       '<svg class="ring ' +
@@ -227,7 +170,8 @@
 
       '<circle class="track" cx="27" cy="27" r="22" fill="none" stroke-width="8"/>' +
 
-      '<circle class="val" cx="27" cy="27" r="22" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="' +
+      '<circle class="val" cx="27" cy="27" r="22" fill="none" stroke-width="8" stroke-linecap="round" ' +
+      'stroke-dasharray="' +
       C.toFixed(2) +
       '" stroke-dashoffset="' +
       off.toFixed(2) +
@@ -236,16 +180,13 @@
       "</svg>";
 
     $("kpis").innerHTML =
-
       kpiCard(
         "k-total",
         P.t("totalBeds"),
         "bed",
         k.operational,
         k.outOfService
-          ? k.outOfService +
-            " " +
-            P.t("outOfServiceShort")
+          ? k.outOfService + " " + P.t("outOfServiceShort")
           : ""
       ) +
 
@@ -264,27 +205,24 @@
       ) +
 
       '<div class="kpi k-rate">' +
+        '<div class="kpi-label">' +
+          P.esc(P.t("occupancyRate")) +
+        "</div>" +
 
-      '<div class="kpi-label">' +
-      P.esc(P.t("occupancyRate")) +
-      "</div>" +
+        '<div class="kpi-main">' +
+          ring +
 
-      '<div class="kpi-main">' +
-      ring +
+          '<span class="kpi-value">' +
+            k.rate +
+            '<span class="pct">%</span>' +
+          "</span>" +
+        "</div>" +
 
-      '<span class="kpi-value">' +
-      k.rate +
-      '<span class="pct">%</span>' +
-      "</span>" +
-
-      "</div>" +
-
-      '<div class="kpi-sub">' +
-      k.occupied +
-      " / " +
-      k.operational +
-      "</div>" +
-
+        '<div class="kpi-sub">' +
+          k.occupied +
+          " / " +
+          k.operational +
+        "</div>" +
       "</div>" +
 
       kpiCard(
@@ -316,10 +254,7 @@
       );
   }
 
-  // ------------------------------------------------------------
-  // Ward map
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ ward map
   function sig(b) {
     return [
       b.operationalStatus,
@@ -333,11 +268,8 @@
   }
 
   function renderWard(d) {
-    const groups =
-      P.groupRooms(d.beds);
-
-    const rows =
-      P.packRows(groups, 10);
+    const groups = P.groupRooms(d.beds);
+    const rows = P.packRows(groups, 10);
 
     const opts = {
       privacy: d.privacy,
@@ -347,11 +279,9 @@
     let html = "";
 
     rows.forEach(row => {
-      html +=
-        '<div class="ward-row">';
+      html += '<div class="ward-row">';
 
       row.forEach(g => {
-
         const t =
           g.type === "Close Observation"
             ? "t-obs"
@@ -359,8 +289,8 @@
                 g.type === "Isolation" ||
                 g.type === "Negative Pressure"
               )
-              ? "t-iso"
-              : "t-reg";
+            ? "t-iso"
+            : "t-reg";
 
         let hIcon = "";
 
@@ -369,16 +299,12 @@
         }
 
         if (t === "t-iso") {
-          hIcon =
-            P.icon("shieldAlert");
+          hIcon = P.icon("shieldAlert");
         }
 
-        const hasNP =
-          g.beds.some(
-            b =>
-              b.bedType ===
-              "Negative Pressure"
-          );
+        const hasNP = g.beds.some(
+          b => b.bedType === "Negative Pressure"
+        );
 
         html +=
           '<section class="room ' +
@@ -422,17 +348,10 @@
           ',1fr)">' +
 
           g.beds
-            .map(
-              b =>
-                P.bedCardHTML(
-                  b,
-                  opts
-                )
-            )
+            .map(b => P.bedCardHTML(b, opts))
             .join("") +
 
           "</div>" +
-
           "</section>";
       });
 
@@ -442,25 +361,20 @@
     $("ward").innerHTML = html;
 
     const first =
-      !Object.keys(
-        state.prevSig
-      ).length;
+      !Object.keys(state.prevSig).length;
 
     d.beds.forEach(b => {
-
       const s = sig(b);
 
       if (
         !first &&
         state.prevSig[b.bed] !== s
       ) {
-
-        const el =
-          $("ward").querySelector(
-            '[data-bed="' +
-            CSS.escape(b.bed) +
-            '"]'
-          );
+        const el = $("ward").querySelector(
+          '[data-bed="' +
+          CSS.escape(b.bed) +
+          '"]'
+        );
 
         if (el) {
           el.classList.add("changed");
@@ -473,43 +387,15 @@
     P.fitText($("ward"));
   }
 
-  // ------------------------------------------------------------
-  // Sidebar
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ sidebar
   function renderSide(d, k) {
-
     const rows = [
-      [
-        "stable",
-        "occupiedBeds",
-        k.occupied
-      ],
-      [
-        "available",
-        "availableBeds",
-        k.available
-      ],
-      [
-        "discharge",
-        "forDischarge",
-        k.discharge
-      ],
-      [
-        "isolation",
-        "isolation",
-        k.isolation
-      ],
-      [
-        "transfer",
-        "transfer",
-        k.transfer
-      ],
-      [
-        "newadm",
-        "newAdmission",
-        k.newAdmission
-      ]
+      ["stable", "occupiedBeds", k.occupied],
+      ["available", "availableBeds", k.available],
+      ["discharge", "forDischarge", k.discharge],
+      ["isolation", "isolation", k.isolation],
+      ["transfer", "transfer", k.transfer],
+      ["newadm", "newAdmission", k.newAdmission]
     ];
 
     $("summary").innerHTML =
@@ -528,89 +414,73 @@
 
     const byRole = {};
 
-    (d.onCall || []).forEach(
-      r => {
-        byRole[r.role] = r;
-      }
-    );
+    (d.onCall || []).forEach(r => {
+      byRole[r.role] = r;
+    });
 
     $("oncall").innerHTML =
-      P.ENUMS.ONCALL_ROLES
-        .map(role => {
+      P.ENUMS.ONCALL_ROLES.map(role => {
+        const r = byRole[role] || {};
+        const nurse = /Nurse/.test(role);
 
-          const r =
-            byRole[role] || {};
+        const shift =
+          r.staffName &&
+          r.shiftStart &&
+          r.shiftEnd
+            ? P.esc(r.shiftStart) +
+              "–" +
+              P.esc(r.shiftEnd)
+            : "";
 
-          const nurse =
-            /Nurse/.test(role);
+        return (
+          '<div class="oc-row' +
+          (nurse ? " nurse" : "") +
+          '">' +
 
-          const shift =
-            r.staffName &&
-            r.shiftStart &&
-            r.shiftEnd
-              ? P.esc(r.shiftStart) +
-                "–" +
-                P.esc(r.shiftEnd)
-              : "";
+          P.icon(
+            nurse
+              ? "nurse"
+              : "stethoscope"
+          ) +
 
-          return (
-            '<div class="oc-row' +
-            (nurse ? " nurse" : "") +
-            '">' +
+          '<div class="oc-text">' +
 
-            P.icon(
-              nurse
-                ? "nurse"
-                : "stethoscope"
-            ) +
+          '<div class="oc-role">' +
+          P.esc(P.t(role)) +
+          "</div>" +
 
-            '<div class="oc-text">' +
+          '<div class="oc-name' +
+          (r.staffName ? "" : " empty") +
+          '">' +
 
-            '<div class="oc-role">' +
-            P.esc(P.t(role)) +
-            "</div>" +
+          P.esc(
+            r.staffName ||
+            P.t("notAssigned")
+          ) +
 
-            '<div class="oc-name' +
-            (
-              r.staffName
-                ? ""
-                : " empty"
-            ) +
-            '">' +
+          "</div>" +
+          "</div>" +
 
-            P.esc(
-              r.staffName ||
-              P.t("notAssigned")
-            ) +
+          '<div class="oc-shift">' +
+          shift +
+          "</div>" +
 
-            "</div>" +
+          "</div>"
+        );
+      }).join("");
 
-            "</div>" +
+    const s = d.settings || {};
 
-            '<div class="oc-shift">' +
-            shift +
-            "</div>" +
-
-            "</div>"
-          );
-        })
-        .join("");
-
-    const s =
-      d.settings || {};
-
-    const ext =
-      v =>
-        v
-          ? '<span class="ext">' +
-            P.esc(v) +
-            "</span>"
-          : '<span class="ext empty">' +
-            P.esc(P.t("notSet")) +
-            "</span>";
+    const ext = v =>
+      v
+        ? '<span class="ext">' +
+          P.esc(v) +
+          "</span>"
+        : '<span class="ext empty">' +
+          P.esc(P.t("notSet")) +
+          "</span>";
 
     $("emergency").innerHTML =
-
       '<div class="em rrt">' +
       P.icon("siren") +
       P.esc(P.t("rrt")) +
@@ -624,45 +494,19 @@
       "</div>";
   }
 
-  // ------------------------------------------------------------
-  // Legend
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ legend
   function renderLegend() {
-
     const L = [
-      [
-        "stable",
-        P.t("legendStable")
-      ],
-      [
-        "postop",
-        P.t("legendPostOp")
-      ],
-      [
-        "discharge",
-        P.t("forDischarge")
-      ],
-      [
-        "isolation",
-        P.t("isolation")
-      ],
-      [
-        "transfer",
-        P.t("transfer")
-      ],
-      [
-        "newadm",
-        P.t("newAdmission")
-      ],
-      [
-        "available",
-        P.tStatus("Available")
-      ]
+      ["stable", P.t("legendStable")],
+      ["postop", P.t("legendPostOp")],
+      ["discharge", P.t("forDischarge")],
+      ["isolation", P.t("isolation")],
+      ["transfer", P.t("transfer")],
+      ["newadm", P.t("newAdmission")],
+      ["available", P.tStatus("Available")]
     ];
 
     $("legend").innerHTML =
-
       L.map(
         x =>
           "<span>" +
@@ -688,19 +532,16 @@
       "</span>";
   }
 
-  // ------------------------------------------------------------
-  // Sync status
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ sync status
   function intervalMs() {
-
     const s =
       state.data &&
       state.data.settings;
 
     const v =
       parseInt(
-        s && s.refreshInterval,
+        s &&
+        s.refreshInterval,
         10
       ) ||
       CFG.DEFAULT_REFRESH_SECONDS;
@@ -714,7 +555,6 @@
   }
 
   function ago(ms) {
-
     const s =
       Math.round(ms / 1000);
 
@@ -734,7 +574,6 @@
   }
 
   function renderSync() {
-
     const el = $("sync");
 
     if (!el) return;
@@ -742,37 +581,26 @@
     const demo =
       API.mode() === "demo";
 
-    const stage =
-      $("stage");
+    const stage = $("stage");
+    const banner = $("connBanner");
 
-    const banner =
-      $("connBanner");
-
-    const now =
-      Date.now();
+    const now = Date.now();
 
     const stale =
       state.lastOkAt &&
-      (
-        now -
-        state.lastOkAt
-      ) >
+      (now - state.lastOkAt) >
       intervalMs() *
       CFG.STALE_AFTER_MISSED_CYCLES;
 
-    let pill;
-    let when;
+    let pill, when;
 
     if (
       state.lastError &&
       state.lastOkAt
     ) {
-
       pill =
         '<span class="pill err">' +
-        P.esc(
-          P.t("connectionLost")
-        ) +
+        P.esc(P.t("connectionLost")) +
         "</span>";
 
       when =
@@ -780,18 +608,13 @@
         " <b>" +
         P.esc(
           P.fmtTime(
-            new Date(
-              state.lastOkAt
-            ),
+            new Date(state.lastOkAt),
             TZ,
             true
           )
         ) +
         "</b><br>" +
-        ago(
-          now -
-          state.lastOkAt
-        );
+        ago(now - state.lastOkAt);
 
       banner.hidden = false;
 
@@ -807,43 +630,31 @@
         " " +
         P.esc(
           P.fmtTime(
-            new Date(
-              state.lastOkAt
-            ),
+            new Date(state.lastOkAt),
             TZ,
             false
           )
         ) +
         " (" +
-        ago(
-          now -
-          state.lastOkAt
-        ) +
+        ago(now - state.lastOkAt) +
         ")";
+    }
 
-    } else if (
-      state.lastError
-    ) {
-
+    else if (state.lastError) {
       pill =
         '<span class="pill err">' +
-        P.esc(
-          P.t("connectionLost")
-        ) +
+        P.esc(P.t("connectionLost")) +
         "</span>";
 
       when =
         P.esc(
-          state.lastError.error ||
-          ""
+          state.lastError.error || ""
         );
 
       banner.hidden = true;
+    }
 
-    } else if (
-      state.lastOkAt
-    ) {
-
+    else if (state.lastOkAt) {
       pill =
         demo
           ? '<span class="pill demo">Demo</span>'
@@ -856,9 +667,7 @@
         " <b>" +
         P.esc(
           P.fmtTime(
-            new Date(
-              state.lastOkAt
-            ),
+            new Date(state.lastOkAt),
             TZ,
             true
           )
@@ -872,16 +681,14 @@
         );
 
       banner.hidden = true;
+    }
 
-    } else {
-
+    else {
       pill =
         '<span class="pill demo">…</span>';
 
       when =
-        P.esc(
-          P.t("connecting")
-        );
+        P.esc(P.t("connecting"));
     }
 
     stage.classList.toggle(
@@ -897,9 +704,7 @@
       state.data.privacy
         ? '<span class="priv">' +
           P.icon("lock") +
-          P.esc(
-            P.t("privacyOn")
-          ) +
+          P.esc(P.t("privacyOn")) +
           "</span>"
         : "";
 
@@ -911,23 +716,16 @@
       priv;
   }
 
-  // ------------------------------------------------------------
-  // Render
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ refresh loop
   function render() {
-
-    const d =
-      state.data;
+    const d = state.data;
 
     renderHeader(
       d.settings || {}
     );
 
     const k =
-      P.computeKpis(
-        d.beds
-      );
+      P.computeKpis(d.beds);
 
     renderKpis(k);
     renderWard(d);
@@ -940,7 +738,6 @@
     title,
     text
   ) {
-
     $("ward").innerHTML =
       '<div class="ward-msg">' +
       "<div>" +
@@ -954,12 +751,7 @@
       "</div>";
   }
 
-  // ------------------------------------------------------------
-  // Refresh
-  // ------------------------------------------------------------
-
   async function refresh() {
-
     if (state.busy) {
       state.again = true;
       return;
@@ -968,12 +760,9 @@
     state.busy = true;
     state.again = false;
 
-    clearTimeout(
-      state.timer
-    );
+    clearTimeout(state.timer);
 
     try {
-
       const res =
         await API.getDisplay();
 
@@ -981,26 +770,19 @@
         res &&
         res.ok &&
         res.data &&
-        Array.isArray(
-          res.data.beds
-        )
+        Array.isArray(res.data.beds)
       ) {
-
-        state.data =
-          res.data;
-
-        state.lastOkAt =
-          Date.now();
-
-        state.lastError =
-          null;
+        state.data = res.data;
+        state.lastOkAt = Date.now();
+        state.lastError = null;
 
         render();
+      }
 
-      } else {
-
+      else {
         state.lastError =
-          res || {
+          res ||
+          {
             error:
               "Unknown error"
           };
@@ -1008,13 +790,10 @@
         if (
           res &&
           (
-            res.code ===
-              "UNAUTHORIZED" ||
-            res.code ===
-              "NO_DISPLAY_KEY"
+            res.code === "UNAUTHORIZED" ||
+            res.code === "NO_DISPLAY_KEY"
           )
         ) {
-
           state.data = null;
           state.lastOkAt = 0;
 
@@ -1027,11 +806,9 @@
             "This screen is not connected",
             res.error
           );
+        }
 
-        } else if (
-          !state.data
-        ) {
-
+        else if (!state.data) {
           showMessage(
             "Waiting for ward data",
             (
@@ -1046,29 +823,9 @@
 
         renderSync();
       }
+    }
 
-    } catch (err) {
-
-      state.lastError = {
-        error:
-          err &&
-          err.message
-            ? err.message
-            : "Unexpected error"
-      };
-
-      if (!state.data) {
-        showMessage(
-          "Waiting for ward data",
-          state.lastError.error +
-          " The board retries automatically."
-        );
-      }
-
-      renderSync();
-
-    } finally {
-
+    finally {
       state.busy = false;
 
       state.timer =
@@ -1077,19 +834,16 @@
           state.again
             ? 50
             : state.lastError
-              ? Math.min(
-                  intervalMs(),
-                  15000
-                )
-              : intervalMs()
+            ? Math.min(
+                intervalMs(),
+                15000
+              )
+            : intervalMs()
         );
     }
   }
 
-  // ------------------------------------------------------------
-  // Demo mode / events
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ events
   window.addEventListener(
     "storage",
     e => {
@@ -1110,12 +864,7 @@
   window.addEventListener(
     "hashchange",
     () => {
-
-      if (
-        /key=/.test(
-          location.hash
-        )
-      ) {
+      if (/key=/.test(location.hash)) {
         API.captureDisplayKey();
         refresh();
       }
@@ -1125,38 +874,27 @@
   document.addEventListener(
     "visibilitychange",
     () => {
-
       if (!document.hidden) {
         refresh();
       }
     }
   );
 
-  // ------------------------------------------------------------
-  // Full screen
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ fullscreen
   function toggleFs() {
-
-    if (
-      !document.fullscreenElement
-    ) {
-
+    if (!document.fullscreenElement) {
       if (
         document.documentElement
           .requestFullscreen
       ) {
-
         document.documentElement
           .requestFullscreen()
           .catch(() => {});
       }
+    }
 
-    } else {
-
-      if (
-        document.exitFullscreen
-      ) {
+    else {
+      if (document.exitFullscreen) {
         document.exitFullscreen();
       }
     }
@@ -1165,7 +903,6 @@
   document.addEventListener(
     "keydown",
     e => {
-
       if (
         e.key === "f" ||
         e.key === "F"
@@ -1192,53 +929,34 @@
   document.addEventListener(
     "mousemove",
     () => {
-
       document.body.classList.remove(
         "hide-cursor"
       );
 
-      const h =
-        $("fsHint");
+      const h = $("fsHint");
 
-      if (
-        !document.fullscreenElement &&
-        h
-      ) {
-        h.classList.add(
-          "show"
-        );
+      if (!document.fullscreenElement) {
+        h.classList.add("show");
       }
 
-      clearTimeout(
-        cursorTimer
-      );
+      clearTimeout(cursorTimer);
 
       cursorTimer =
         setTimeout(
           () => {
-
             document.body.classList.add(
               "hide-cursor"
             );
 
-            if (h) {
-              h.classList.remove(
-                "show"
-              );
-            }
-
+            h.classList.remove("show");
           },
           3000
         );
     }
   );
 
-  // ------------------------------------------------------------
-  // Wake lock
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ wake lock
   if (navigator.wakeLock) {
-
     const lock = () =>
       navigator.wakeLock
         .request("screen")
@@ -1249,7 +967,6 @@
     document.addEventListener(
       "visibilitychange",
       () => {
-
         if (!document.hidden) {
           lock();
         }
@@ -1257,10 +974,7 @@
     );
   }
 
-  // ------------------------------------------------------------
-  // Start dashboard
-  // ------------------------------------------------------------
-
+  // ------------------------------------------------------------ start
   API.captureDisplayKey();
 
   renderLegend();
