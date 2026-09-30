@@ -1,12 +1,18 @@
 /*
  * PSW Smart Ward Board — TV dashboard (read-only).
- * The clock runs independently of data refresh. Data refreshes in place (no page reload).
- * Last good data is kept IN MEMORY only, and is visibly marked when the connection fails.
+ * The clock runs independently of data refresh.
+ * Data refreshes in place (no page reload).
+ * Last good data is kept IN MEMORY only,
+ * and is visibly marked when the connection fails.
  */
+
 (function () {
   "use strict";
 
-  const CFG = window.PSW_CONFIG, P = window.PSW, API = window.PSWApi;
+  const CFG = window.PSW_CONFIG,
+        P = window.PSW,
+        API = window.PSWApi;
+
   const $ = id => document.getElementById(id);
   const TZ = CFG.TIMEZONE;
 
@@ -19,7 +25,10 @@
     busy: false
   };
 
-  // ------------------------------------------------------------ stage scaling
+  // ------------------------------------------------------------
+  // STAGE SCALING — TV 16:9 / 1920×1080
+  // ------------------------------------------------------------
+
   function scale() {
     const vv = window.visualViewport;
 
@@ -27,17 +36,32 @@
       1,
       vv && vv.width
         ? vv.width
-        : (document.documentElement.clientWidth || window.innerWidth || 1920)
+        : (
+            document.documentElement.clientWidth ||
+            window.innerWidth ||
+            1920
+          )
     );
 
     const h = Math.max(
       1,
       vv && vv.height
         ? vv.height
-        : (document.documentElement.clientHeight || window.innerHeight || 1080)
+        : (
+            document.documentElement.clientHeight ||
+            window.innerHeight ||
+            1080
+          )
     );
 
-    const s = Math.min(w / 1920, h / 1080);
+    const DESIGN_W = 1920;
+    const DESIGN_H = 1080;
+
+    const s = Math.min(
+      w / DESIGN_W,
+      h / DESIGN_H
+    );
+
     const stage = document.getElementById("stage");
 
     if (stage && isFinite(s) && s > 0) {
@@ -45,7 +69,11 @@
     }
   }
 
-  window.addEventListener("resize", scale, { passive: true });
+  window.addEventListener(
+    "resize",
+    scale,
+    { passive: true }
+  );
 
   window.addEventListener(
     "orientationchange",
@@ -53,7 +81,11 @@
     { passive: true }
   );
 
-  window.addEventListener("pageshow", scale, { passive: true });
+  window.addEventListener(
+    "pageshow",
+    scale,
+    { passive: true }
+  );
 
   if (window.visualViewport) {
     window.visualViewport.addEventListener(
@@ -66,14 +98,20 @@
   scale();
   requestAnimationFrame(scale);
   setTimeout(scale, 250);
+  setTimeout(scale, 1000);
 
-  // ------------------------------------------------------------ clock
+  // ------------------------------------------------------------
+  // CLOCK
+  // ------------------------------------------------------------
+
   function tick() {
     const now = new Date();
 
-    $("clockDate").textContent = P.fmtDate(now, TZ);
+    $("clockDate").textContent =
+      P.fmtDate(now, TZ);
 
-    const t = P.fmtTime(now, TZ, false).split(" ");
+    const t =
+      P.fmtTime(now, TZ, false).split(" ");
 
     $("clockTime").innerHTML =
       P.esc(t[0]) +
@@ -87,34 +125,56 @@
   setInterval(tick, 1000);
   tick();
 
-  // ------------------------------------------------------------ header
+  // ------------------------------------------------------------
+  // HEADER
+  // ------------------------------------------------------------
+
   function renderHeader(s) {
     P.setLang(s.language);
 
-    $("hospitalName").textContent = s.hospitalName || "";
-    $("hospitalNameAr").textContent = s.hospitalNameAr || "";
-    $("cluster").textContent = s.cluster || "";
+    $("hospitalName").textContent =
+      s.hospitalName || "";
 
-    $("deptName").textContent = s.departmentName || "";
-    $("deptNameAr").textContent = s.departmentNameAr || "";
+    $("hospitalNameAr").textContent =
+      s.hospitalNameAr || "";
 
-    const tg = (s.tagline || "").split(/,\s*/);
+    $("cluster").textContent =
+      s.cluster || "";
+
+    $("deptName").textContent =
+      s.departmentName || "";
+
+    $("deptNameAr").textContent =
+      s.departmentNameAr || "";
+
+    const tg =
+      (s.tagline || "").split(/,\s*/);
 
     $("tagline").innerHTML =
       tg.map(P.esc).join(",\n") +
-      (s.tagline ? ' <span class="heart">♡</span>' : "");
+      (
+        s.tagline
+          ? ' <span class="heart">♡</span>'
+          : ""
+      );
 
     const logo = $("logo");
 
-    // NEW HOSPITAL LOGO
-    const want = s.logo || "assets/mch-cluster-logo.png";
+    // New Hafr Al Batin Health Cluster logo
+    const want =
+      s.logo ||
+      "assets/mch-cluster-logo.png";
 
-    if (logo.getAttribute("src") !== want) {
+    if (
+      logo &&
+      logo.getAttribute("src") !== want
+    ) {
       logo.setAttribute("src", want);
     }
 
     document.title =
-      (s.departmentCode || "PSW") + " Ward Board";
+      (s.departmentCode || "PSW") +
+      " Ward Board";
 
     $("h-summary").innerHTML =
       P.icon("bars", "", 2.6) +
@@ -125,43 +185,67 @@
       P.esc(P.t("onCallTeam"));
   }
 
-  // ------------------------------------------------------------ KPIs
-  function kpiCard(cls, label, iconName, value, sub) {
+  // ------------------------------------------------------------
+  // KPI CARD
+  // ------------------------------------------------------------
+
+  function kpiCard(
+    cls,
+    label,
+    iconName,
+    value,
+    sub
+  ) {
     return (
-      '<div class="kpi ' + cls + '">' +
-        '<div class="kpi-label">' +
-          P.esc(label) +
-        "</div>" +
+      '<div class="kpi ' +
+      cls +
+      '">' +
 
-        '<div class="kpi-main">' +
-          '<span class="kpi-icon">' +
-            P.icon(iconName) +
-          "</span>" +
+      '<div class="kpi-label">' +
+      P.esc(label) +
+      "</div>" +
 
-          '<span class="kpi-value">' +
-            value +
-          "</span>" +
-        "</div>" +
+      '<div class="kpi-main">' +
 
-        '<div class="kpi-sub">' +
-          P.esc(sub || "") +
-        "</div>" +
+      '<span class="kpi-icon">' +
+      P.icon(iconName) +
+      "</span>" +
+
+      '<span class="kpi-value">' +
+      value +
+      "</span>" +
+
+      "</div>" +
+
+      '<div class="kpi-sub">' +
+      P.esc(sub || "") +
+      "</div>" +
+
       "</div>"
     );
   }
 
+  // ------------------------------------------------------------
+  // KPIs
+  // ------------------------------------------------------------
+
   function renderKpis(k) {
-    const C = 2 * Math.PI * 22;
+    const C =
+      2 * Math.PI * 22;
 
     const off =
-      C * (1 - Math.min(k.rate, 100) / 100);
+      C *
+      (
+        1 -
+        Math.min(k.rate, 100) / 100
+      );
 
     const ringCls =
       k.rate >= 100
         ? "full"
         : k.rate >= 90
-        ? "high"
-        : "";
+          ? "high"
+          : "";
 
     const ring =
       '<svg class="ring ' +
@@ -170,8 +254,7 @@
 
       '<circle class="track" cx="27" cy="27" r="22" fill="none" stroke-width="8"/>' +
 
-      '<circle class="val" cx="27" cy="27" r="22" fill="none" stroke-width="8" stroke-linecap="round" ' +
-      'stroke-dasharray="' +
+      '<circle class="val" cx="27" cy="27" r="22" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="' +
       C.toFixed(2) +
       '" stroke-dashoffset="' +
       off.toFixed(2) +
@@ -180,13 +263,16 @@
       "</svg>";
 
     $("kpis").innerHTML =
+
       kpiCard(
         "k-total",
         P.t("totalBeds"),
         "bed",
         k.operational,
         k.outOfService
-          ? k.outOfService + " " + P.t("outOfServiceShort")
+          ? k.outOfService +
+            " " +
+            P.t("outOfServiceShort")
           : ""
       ) +
 
@@ -205,24 +291,28 @@
       ) +
 
       '<div class="kpi k-rate">' +
-        '<div class="kpi-label">' +
-          P.esc(P.t("occupancyRate")) +
-        "</div>" +
 
-        '<div class="kpi-main">' +
-          ring +
+      '<div class="kpi-label">' +
+      P.esc(P.t("occupancyRate")) +
+      "</div>" +
 
-          '<span class="kpi-value">' +
-            k.rate +
-            '<span class="pct">%</span>' +
-          "</span>" +
-        "</div>" +
+      '<div class="kpi-main">' +
 
-        '<div class="kpi-sub">' +
-          k.occupied +
-          " / " +
-          k.operational +
-        "</div>" +
+      ring +
+
+      '<span class="kpi-value">' +
+      k.rate +
+      '<span class="pct">%</span>' +
+      "</span>" +
+
+      "</div>" +
+
+      '<div class="kpi-sub">' +
+      k.occupied +
+      " / " +
+      k.operational +
+      "</div>" +
+
       "</div>" +
 
       kpiCard(
@@ -254,7 +344,10 @@
       );
   }
 
-  // ------------------------------------------------------------ ward map
+  // ------------------------------------------------------------
+  // WARD MAP
+  // ------------------------------------------------------------
+
   function sig(b) {
     return [
       b.operationalStatus,
@@ -268,8 +361,11 @@
   }
 
   function renderWard(d) {
-    const groups = P.groupRooms(d.beds);
-    const rows = P.packRows(groups, 10);
+    const groups =
+      P.groupRooms(d.beds);
+
+    const rows =
+      P.packRows(groups, 10);
 
     const opts = {
       privacy: d.privacy,
@@ -279,9 +375,11 @@
     let html = "";
 
     rows.forEach(row => {
-      html += '<div class="ward-row">';
+      html +=
+        '<div class="ward-row">';
 
       row.forEach(g => {
+
         const t =
           g.type === "Close Observation"
             ? "t-obs"
@@ -289,22 +387,27 @@
                 g.type === "Isolation" ||
                 g.type === "Negative Pressure"
               )
-            ? "t-iso"
-            : "t-reg";
+              ? "t-iso"
+              : "t-reg";
 
         let hIcon = "";
 
         if (t === "t-obs") {
-          hIcon = P.icon("eye");
+          hIcon =
+            P.icon("eye");
         }
 
         if (t === "t-iso") {
-          hIcon = P.icon("shieldAlert");
+          hIcon =
+            P.icon("shieldAlert");
         }
 
-        const hasNP = g.beds.some(
-          b => b.bedType === "Negative Pressure"
-        );
+        const hasNP =
+          g.beds.some(
+            b =>
+              b.bedType ===
+              "Negative Pressure"
+          );
 
         html +=
           '<section class="room ' +
@@ -348,54 +451,98 @@
           ',1fr)">' +
 
           g.beds
-            .map(b => P.bedCardHTML(b, opts))
+            .map(
+              b =>
+                P.bedCardHTML(
+                  b,
+                  opts
+                )
+            )
             .join("") +
 
           "</div>" +
+
           "</section>";
       });
 
       html += "</div>";
     });
 
-    $("ward").innerHTML = html;
+    $("ward").innerHTML =
+      html;
 
     const first =
-      !Object.keys(state.prevSig).length;
+      !Object.keys(
+        state.prevSig
+      ).length;
 
     d.beds.forEach(b => {
-      const s = sig(b);
+      const s =
+        sig(b);
 
       if (
         !first &&
         state.prevSig[b.bed] !== s
       ) {
-        const el = $("ward").querySelector(
-          '[data-bed="' +
-          CSS.escape(b.bed) +
-          '"]'
-        );
+        const el =
+          $("ward").querySelector(
+            '[data-bed="' +
+            CSS.escape(b.bed) +
+            '"]'
+          );
 
         if (el) {
-          el.classList.add("changed");
+          el.classList.add(
+            "changed"
+          );
         }
       }
 
-      state.prevSig[b.bed] = s;
+      state.prevSig[b.bed] =
+        s;
     });
 
-    P.fitText($("ward"));
+    P.fitText(
+      $("ward")
+    );
   }
 
-  // ------------------------------------------------------------ sidebar
+  // ------------------------------------------------------------
+  // SIDEBAR
+  // ------------------------------------------------------------
+
   function renderSide(d, k) {
     const rows = [
-      ["stable", "occupiedBeds", k.occupied],
-      ["available", "availableBeds", k.available],
-      ["discharge", "forDischarge", k.discharge],
-      ["isolation", "isolation", k.isolation],
-      ["transfer", "transfer", k.transfer],
-      ["newadm", "newAdmission", k.newAdmission]
+      [
+        "stable",
+        "occupiedBeds",
+        k.occupied
+      ],
+      [
+        "available",
+        "availableBeds",
+        k.available
+      ],
+      [
+        "discharge",
+        "forDischarge",
+        k.discharge
+      ],
+      [
+        "isolation",
+        "isolation",
+        k.isolation
+      ],
+      [
+        "transfer",
+        "transfer",
+        k.transfer
+      ],
+      [
+        "newadm",
+        "newAdmission",
+        k.newAdmission
+      ]
     ];
 
     $("summary").innerHTML =
@@ -414,62 +561,76 @@
 
     const byRole = {};
 
-    (d.onCall || []).forEach(r => {
-      byRole[r.role] = r;
-    });
+    (d.onCall || [])
+      .forEach(r => {
+        byRole[r.role] =
+          r;
+      });
 
     $("oncall").innerHTML =
-      P.ENUMS.ONCALL_ROLES.map(role => {
-        const r = byRole[role] || {};
-        const nurse = /Nurse/.test(role);
+      P.ENUMS.ONCALL_ROLES
+        .map(role => {
 
-        const shift =
-          r.staffName &&
-          r.shiftStart &&
-          r.shiftEnd
-            ? P.esc(r.shiftStart) +
-              "–" +
-              P.esc(r.shiftEnd)
-            : "";
+          const r =
+            byRole[role] || {};
 
-        return (
-          '<div class="oc-row' +
-          (nurse ? " nurse" : "") +
-          '">' +
+          const nurse =
+            /Nurse/.test(role);
 
-          P.icon(
-            nurse
-              ? "nurse"
-              : "stethoscope"
-          ) +
+          const shift =
+            r.staffName &&
+            r.shiftStart &&
+            r.shiftEnd
+              ? P.esc(r.shiftStart) +
+                "–" +
+                P.esc(r.shiftEnd)
+              : "";
 
-          '<div class="oc-text">' +
+          return (
+            '<div class="oc-row' +
+            (nurse ? " nurse" : "") +
+            '">' +
 
-          '<div class="oc-role">' +
-          P.esc(P.t(role)) +
-          "</div>" +
+            P.icon(
+              nurse
+                ? "nurse"
+                : "stethoscope"
+            ) +
 
-          '<div class="oc-name' +
-          (r.staffName ? "" : " empty") +
-          '">' +
+            '<div class="oc-text">' +
 
-          P.esc(
-            r.staffName ||
-            P.t("notAssigned")
-          ) +
+            '<div class="oc-role">' +
+            P.esc(P.t(role)) +
+            "</div>" +
 
-          "</div>" +
-          "</div>" +
+            '<div class="oc-name' +
+            (
+              r.staffName
+                ? ""
+                : " empty"
+            ) +
+            '">' +
 
-          '<div class="oc-shift">' +
-          shift +
-          "</div>" +
+            P.esc(
+              r.staffName ||
+              P.t("notAssigned")
+            ) +
 
-          "</div>"
-        );
-      }).join("");
+            "</div>" +
 
-    const s = d.settings || {};
+            "</div>" +
+
+            '<div class="oc-shift">' +
+            shift +
+            "</div>" +
+
+            "</div>"
+          );
+        })
+        .join("");
+
+    const s =
+      d.settings || {};
 
     const ext = v =>
       v
@@ -481,6 +642,7 @@
           "</span>";
 
     $("emergency").innerHTML =
+
       '<div class="em rrt">' +
       P.icon("siren") +
       P.esc(P.t("rrt")) +
@@ -494,16 +656,40 @@
       "</div>";
   }
 
-  // ------------------------------------------------------------ legend
+  // ------------------------------------------------------------
+  // LEGEND
+  // ------------------------------------------------------------
+
   function renderLegend() {
     const L = [
-      ["stable", P.t("legendStable")],
-      ["postop", P.t("legendPostOp")],
-      ["discharge", P.t("forDischarge")],
-      ["isolation", P.t("isolation")],
-      ["transfer", P.t("transfer")],
-      ["newadm", P.t("newAdmission")],
-      ["available", P.tStatus("Available")]
+      [
+        "stable",
+        P.t("legendStable")
+      ],
+      [
+        "postop",
+        P.t("legendPostOp")
+      ],
+      [
+        "discharge",
+        P.t("forDischarge")
+      ],
+      [
+        "isolation",
+        P.t("isolation")
+      ],
+      [
+        "transfer",
+        P.t("transfer")
+      ],
+      [
+        "newadm",
+        P.t("newAdmission")
+      ],
+      [
+        "available",
+        P.tStatus("Available")
+      ]
     ];
 
     $("legend").innerHTML =
@@ -532,7 +718,10 @@
       "</span>";
   }
 
-  // ------------------------------------------------------------ sync status
+  // ------------------------------------------------------------
+  // SYNC STATUS
+  // ------------------------------------------------------------
+
   function intervalMs() {
     const s =
       state.data &&
@@ -574,25 +763,34 @@
   }
 
   function renderSync() {
-    const el = $("sync");
+    const el =
+      $("sync");
 
     if (!el) return;
 
     const demo =
       API.mode() === "demo";
 
-    const stage = $("stage");
-    const banner = $("connBanner");
+    const stage =
+      $("stage");
 
-    const now = Date.now();
+    const banner =
+      $("connBanner");
+
+    const now =
+      Date.now();
 
     const stale =
       state.lastOkAt &&
-      (now - state.lastOkAt) >
+      (
+        now -
+        state.lastOkAt
+      ) >
       intervalMs() *
       CFG.STALE_AFTER_MISSED_CYCLES;
 
-    let pill, when;
+    let pill;
+    let when;
 
     if (
       state.lastError &&
@@ -600,7 +798,9 @@
     ) {
       pill =
         '<span class="pill err">' +
-        P.esc(P.t("connectionLost")) +
+        P.esc(
+          P.t("connectionLost")
+        ) +
         "</span>";
 
       when =
@@ -608,15 +808,21 @@
         " <b>" +
         P.esc(
           P.fmtTime(
-            new Date(state.lastOkAt),
+            new Date(
+              state.lastOkAt
+            ),
             TZ,
             true
           )
         ) +
         "</b><br>" +
-        ago(now - state.lastOkAt);
+        ago(
+          now -
+          state.lastOkAt
+        );
 
-      banner.hidden = false;
+      banner.hidden =
+        false;
 
       banner.innerHTML =
         P.icon("alert") +
@@ -630,31 +836,44 @@
         " " +
         P.esc(
           P.fmtTime(
-            new Date(state.lastOkAt),
+            new Date(
+              state.lastOkAt
+            ),
             TZ,
             false
           )
         ) +
         " (" +
-        ago(now - state.lastOkAt) +
+        ago(
+          now -
+          state.lastOkAt
+        ) +
         ")";
     }
 
-    else if (state.lastError) {
+    else if (
+      state.lastError
+    ) {
       pill =
         '<span class="pill err">' +
-        P.esc(P.t("connectionLost")) +
+        P.esc(
+          P.t("connectionLost")
+        ) +
         "</span>";
 
       when =
         P.esc(
-          state.lastError.error || ""
+          state.lastError.error ||
+          ""
         );
 
-      banner.hidden = true;
+      banner.hidden =
+        true;
     }
 
-    else if (state.lastOkAt) {
+    else if (
+      state.lastOkAt
+    ) {
       pill =
         demo
           ? '<span class="pill demo">Demo</span>'
@@ -667,7 +886,9 @@
         " <b>" +
         P.esc(
           P.fmtTime(
-            new Date(state.lastOkAt),
+            new Date(
+              state.lastOkAt
+            ),
             TZ,
             true
           )
@@ -680,7 +901,8 @@
             : ""
         );
 
-      banner.hidden = true;
+      banner.hidden =
+        true;
     }
 
     else {
@@ -688,7 +910,9 @@
         '<span class="pill demo">…</span>';
 
       when =
-        P.esc(P.t("connecting"));
+        P.esc(
+          P.t("connecting")
+        );
     }
 
     stage.classList.toggle(
@@ -704,7 +928,9 @@
       state.data.privacy
         ? '<span class="priv">' +
           P.icon("lock") +
-          P.esc(P.t("privacyOn")) +
+          P.esc(
+            P.t("privacyOn")
+          ) +
           "</span>"
         : "";
 
@@ -716,16 +942,22 @@
       priv;
   }
 
-  // ------------------------------------------------------------ refresh loop
+  // ------------------------------------------------------------
+  // RENDER
+  // ------------------------------------------------------------
+
   function render() {
-    const d = state.data;
+    const d =
+      state.data;
 
     renderHeader(
       d.settings || {}
     );
 
     const k =
-      P.computeKpis(d.beds);
+      P.computeKpis(
+        d.beds
+      );
 
     renderKpis(k);
     renderWard(d);
@@ -751,16 +983,27 @@
       "</div>";
   }
 
+  // ------------------------------------------------------------
+  // REFRESH
+  // ------------------------------------------------------------
+
   async function refresh() {
     if (state.busy) {
-      state.again = true;
+      state.again =
+        true;
+
       return;
     }
 
-    state.busy = true;
-    state.again = false;
+    state.busy =
+      true;
 
-    clearTimeout(state.timer);
+    state.again =
+      false;
+
+    clearTimeout(
+      state.timer
+    );
 
     try {
       const res =
@@ -770,19 +1013,25 @@
         res &&
         res.ok &&
         res.data &&
-        Array.isArray(res.data.beds)
+        Array.isArray(
+          res.data.beds
+        )
       ) {
-        state.data = res.data;
-        state.lastOkAt = Date.now();
-        state.lastError = null;
+        state.data =
+          res.data;
+
+        state.lastOkAt =
+          Date.now();
+
+        state.lastError =
+          null;
 
         render();
       }
 
       else {
         state.lastError =
-          res ||
-          {
+          res || {
             error:
               "Unknown error"
           };
@@ -790,17 +1039,29 @@
         if (
           res &&
           (
-            res.code === "UNAUTHORIZED" ||
-            res.code === "NO_DISPLAY_KEY"
+            res.code ===
+              "UNAUTHORIZED" ||
+            res.code ===
+              "NO_DISPLAY_KEY"
           )
         ) {
-          state.data = null;
-          state.lastOkAt = 0;
+          state.data =
+            null;
 
-          $("kpis").innerHTML = "";
-          $("summary").innerHTML = "";
-          $("oncall").innerHTML = "";
-          $("emergency").innerHTML = "";
+          state.lastOkAt =
+            0;
+
+          $("kpis").innerHTML =
+            "";
+
+          $("summary").innerHTML =
+            "";
+
+          $("oncall").innerHTML =
+            "";
+
+          $("emergency").innerHTML =
+            "";
 
           showMessage(
             "This screen is not connected",
@@ -808,7 +1069,9 @@
           );
         }
 
-        else if (!state.data) {
+        else if (
+          !state.data
+        ) {
           showMessage(
             "Waiting for ward data",
             (
@@ -826,7 +1089,8 @@
     }
 
     finally {
-      state.busy = false;
+      state.busy =
+        false;
 
       state.timer =
         setTimeout(
@@ -834,16 +1098,19 @@
           state.again
             ? 50
             : state.lastError
-            ? Math.min(
-                intervalMs(),
-                15000
-              )
-            : intervalMs()
+              ? Math.min(
+                  intervalMs(),
+                  15000
+                )
+              : intervalMs()
         );
     }
   }
 
-  // ------------------------------------------------------------ events
+  // ------------------------------------------------------------
+  // EVENTS
+  // ------------------------------------------------------------
+
   window.addEventListener(
     "storage",
     e => {
@@ -864,7 +1131,11 @@
   window.addEventListener(
     "hashchange",
     () => {
-      if (/key=/.test(location.hash)) {
+      if (
+        /key=/.test(
+          location.hash
+        )
+      ) {
         API.captureDisplayKey();
         refresh();
       }
@@ -874,15 +1145,22 @@
   document.addEventListener(
     "visibilitychange",
     () => {
-      if (!document.hidden) {
+      if (
+        !document.hidden
+      ) {
         refresh();
       }
     }
   );
 
-  // ------------------------------------------------------------ fullscreen
+  // ------------------------------------------------------------
+  // FULL SCREEN
+  // ------------------------------------------------------------
+
   function toggleFs() {
-    if (!document.fullscreenElement) {
+    if (
+      !document.fullscreenElement
+    ) {
       if (
         document.documentElement
           .requestFullscreen
@@ -894,7 +1172,9 @@
     }
 
     else {
-      if (document.exitFullscreen) {
+      if (
+        document.exitFullscreen
+      ) {
         document.exitFullscreen();
       }
     }
@@ -933,13 +1213,21 @@
         "hide-cursor"
       );
 
-      const h = $("fsHint");
+      const h =
+        $("fsHint");
 
-      if (!document.fullscreenElement) {
-        h.classList.add("show");
+      if (
+        !document.fullscreenElement &&
+        h
+      ) {
+        h.classList.add(
+          "show"
+        );
       }
 
-      clearTimeout(cursorTimer);
+      clearTimeout(
+        cursorTimer
+      );
 
       cursorTimer =
         setTimeout(
@@ -948,33 +1236,48 @@
               "hide-cursor"
             );
 
-            h.classList.remove("show");
+            if (h) {
+              h.classList.remove(
+                "show"
+              );
+            }
           },
           3000
         );
     }
   );
 
-  // ------------------------------------------------------------ wake lock
-  if (navigator.wakeLock) {
-    const lock = () =>
-      navigator.wakeLock
-        .request("screen")
-        .catch(() => {});
+  // ------------------------------------------------------------
+  // WAKE LOCK
+  // ------------------------------------------------------------
+
+  if (
+    navigator.wakeLock
+  ) {
+    const lock =
+      () =>
+        navigator.wakeLock
+          .request("screen")
+          .catch(() => {});
 
     lock();
 
     document.addEventListener(
       "visibilitychange",
       () => {
-        if (!document.hidden) {
+        if (
+          !document.hidden
+        ) {
           lock();
         }
       }
     );
   }
 
-  // ------------------------------------------------------------ start
+  // ------------------------------------------------------------
+  // START
+  // ------------------------------------------------------------
+
   API.captureDisplayKey();
 
   renderLegend();
