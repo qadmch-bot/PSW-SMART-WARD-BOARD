@@ -2,22 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, nofollow">
   <meta name="referrer" content="no-referrer">
 
   <title>PSW Ward Board</title>
 
-  <link
-    rel="icon"
-    href="assets/icons/favicon.svg"
-    type="image/svg+xml"
-  >
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,303 +20,98 @@
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
-
-  <!-- New Hospital / Health Cluster Logo -->
-  <style>
-
-    /* Logo container */
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      min-width: 0;
-    }
-
-    .logo-slot {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-
-      width: 390px;
-      height: 92px;
-
-      flex-shrink: 0;
-      overflow: visible;
-    }
-
-    /* New logo */
-    .logo-slot img,
-    #logo {
-      display: block;
-
-      width: 100%;
-      height: 100%;
-
-      max-width: 100%;
-      max-height: 100%;
-
-      object-fit: contain;
-      object-position: left center;
-    }
-
-    /*
-      The new logo already contains:
-      - تجمع حفر الباطن الصحي
-      - Hafr Al Batin Health Cluster
-      - Maternity and Children Hospital
-
-      Therefore the old text is hidden.
-    */
-    .brand-text {
-      display: none !important;
-    }
-
-  </style>
 </head>
-
 
 <body class="tv">
 
   <div id="viewport">
-
     <div id="stage" aria-live="off">
 
-
-      <!-- =====================================
-           HEADER
-      ====================================== -->
-
+      <!-- HEADER -->
       <header class="hdr">
-
-
-        <!-- Hospital / Health Cluster Logo -->
 
         <div class="brand">
 
           <div class="logo-slot">
-
             <img
               id="logo"
               src="assets/mch-cluster-logo.png"
               alt="Hafr Al Batin Health Cluster - Maternity and Children Hospital"
             >
-
           </div>
-
-
-          <!--
-            Kept in the HTML for compatibility
-            with the existing JavaScript.
-            Hidden by CSS because the logo
-            already contains this information.
-          -->
 
           <div class="brand-text">
-
-            <div
-              class="ar brand-ar"
-              id="hospitalNameAr">
-            </div>
-
-            <div
-              class="brand-en"
-              id="hospitalName">
-            </div>
-
-            <div
-              class="brand-cluster"
-              id="cluster">
-            </div>
-
+            <div class="ar brand-ar" id="hospitalNameAr"></div>
+            <div class="brand-en" id="hospitalName"></div>
+            <div class="brand-cluster" id="cluster"></div>
           </div>
 
         </div>
-
-
-
-        <!-- =====================================
-             DEPARTMENT NAME
-        ====================================== -->
 
         <div class="title">
-
           <h1 id="deptName"></h1>
-
-          <div
-            class="ar title-ar"
-            id="deptNameAr">
-          </div>
-
+          <div class="ar title-ar" id="deptNameAr"></div>
         </div>
 
-
-
-        <!-- =====================================
-             TAGLINE
-        ====================================== -->
-
-        <div
-          class="tagline"
-          id="tagline">
-        </div>
-
-
-
-        <!-- =====================================
-             DATE & TIME
-        ====================================== -->
+        <div class="tagline" id="tagline"></div>
 
         <div class="clock">
-
-          <div
-            class="clock-date"
-            id="clockDate">
-            &nbsp;
-          </div>
-
-          <div
-            class="clock-time"
-            id="clockTime">
-            &nbsp;
-          </div>
-
+          <div class="clock-date" id="clockDate">&nbsp;</div>
+          <div class="clock-time" id="clockTime">&nbsp;</div>
         </div>
 
       </header>
 
+      <!-- KPIs -->
+      <section class="kpis" id="kpis"></section>
 
+      <!-- WARD / BEDS -->
+      <main class="ward" id="ward"></main>
 
-      <!-- =====================================
-           KPI CARDS
-      ====================================== -->
-
-      <section
-        class="kpis"
-        id="kpis">
-      </section>
-
-
-
-      <!-- =====================================
-           WARD / PATIENT BEDS
-      ====================================== -->
-
-      <main
-        class="ward"
-        id="ward">
-      </main>
-
-
-
-      <!-- =====================================
-           RIGHT SIDE
-      ====================================== -->
-
+      <!-- RIGHT SIDE -->
       <aside class="side">
 
-
-        <!-- Ward Summary -->
-
         <section class="panel summary">
-
           <h2 id="h-summary"></h2>
-
           <div id="summary"></div>
-
         </section>
-
-
-
-        <!-- On Call Team -->
 
         <section class="panel oncall">
-
           <h2 id="h-oncall"></h2>
-
           <div id="oncall"></div>
-
         </section>
 
-
-
-        <!-- Emergency Teams -->
-
-        <section
-          class="emergency"
-          id="emergency">
-        </section>
-
+        <section class="emergency" id="emergency"></section>
 
       </aside>
 
-
-
-      <!-- =====================================
-           FOOTER
-      ====================================== -->
-
+      <!-- FOOTER -->
       <footer class="ftr">
-
-        <div
-          class="legend"
-          id="legend">
-        </div>
-
-        <div
-          class="sync"
-          id="sync">
-        </div>
-
+        <div class="legend" id="legend"></div>
+        <div class="sync" id="sync"></div>
       </footer>
-
-
-
-      <!-- =====================================
-           CONNECTION STATUS
-      ====================================== -->
 
       <div
         class="conn-banner"
         id="connBanner"
         role="status"
-        hidden>
-      </div>
-
+        hidden
+      ></div>
 
     </div>
-
   </div>
 
-
-
-  <!-- =====================================
-       FULL SCREEN MESSAGE
-  ====================================== -->
-
-  <div
-    class="fs-hint"
-    id="fsHint">
+  <div class="fs-hint" id="fsHint">
     Press F or double-click for full screen
   </div>
 
-
-
-  <!-- =====================================
-       JAVASCRIPT
-  ====================================== -->
-
+  <!-- SCRIPTS - KEEP THIS ORDER -->
   <script src="js/config.js"></script>
-
   <script src="js/app.js"></script>
-
   <script src="js/engine.js"></script>
-
   <script src="js/seed.js"></script>
-
   <script src="js/api.js"></script>
-
   <script src="js/dashboard.js"></script>
-
 
 </body>
 </html>
